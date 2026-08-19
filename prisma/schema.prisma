@@ -1,0 +1,46 @@
+model Tower {
+  id              String           @id @default(cuid())
+  name            String
+  difficulty      Int              // numeric rank, lower = easier
+  difficultyLabel String?          // e.g. "Insane", "Extreme", "Death"
+  creator         String?
+  description     String?
+  addedAt         DateTime         @default(now())
+  placements      TowerPlacement[]
+  completions     Completion[]
+}
+
+model TowerPlacement {
+  id          String   @id @default(cuid())
+  towerId     String
+  gameName    String   // e.g. "JToH", "Tower Heaven", or the tower's own standalone game name
+  isExclusive Boolean  @default(false) // true if this is the tower's own dedicated place
+  placeUrl    String   // clickable Roblox place link
+  tower       Tower    @relation(fields: [towerId], references: [id])
+}
+
+model Player {
+  id               String       @id @default(cuid())
+  discordId        String       @unique
+  robloxId         String       @unique
+  username         String
+  displayName      String?
+  avatarUrl        String?
+  bio              String?
+  robloxVerified   Boolean      @default(false)
+  joinedAt         DateTime     @default(now())
+  usernameSyncedAt DateTime?    @default(now())
+  completions      Completion[]
+}
+
+model Completion {
+  id          String   @id @default(cuid())
+  playerId    String
+  towerId     String
+  completedAt DateTime @default(now())
+  proofUrl    String?
+  player      Player   @relation(fields: [playerId], references: [id])
+  tower       Tower    @relation(fields: [towerId], references: [id])
+
+  @@unique([playerId, towerId])
+}
